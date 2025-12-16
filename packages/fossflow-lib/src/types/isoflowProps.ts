@@ -20,7 +20,7 @@ export interface LocaleProps {
     exportImage: string;
     clearCanvas: string;
     settings: string;
-    gitHub: string;
+    gitHub: string
   };
   helpDialog: {
     title: string;

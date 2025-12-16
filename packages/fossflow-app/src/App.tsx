@@ -16,6 +16,9 @@ import { allLocales } from 'fossflow';
 import { useIconPackManager, IconPackName } from './services/iconPackManager';
 import './App.css';
 import { BrowserRouter, Route, Routes, useParams } from 'react-router-dom';
+import { getToken } from "./auth/auth";
+import LoginPage from "./pages/LoginPage";
+import { isAdmin, logout } from "./auth/auth";
 
 // Load core isoflow icons (always loaded)
 const coreIcons = flattenCollections([isoflowIsopack]);
@@ -29,22 +32,16 @@ interface SavedDiagram {
 }
 
 function App() {
-  // Get base path from PUBLIC_URL, ensure no trailing slash for React Router
-  const publicUrl = process.env.PUBLIC_URL || '';
-  // React Router basename should not have trailing slash
-  const basename = publicUrl ? (publicUrl.endsWith('/') ? publicUrl.slice(0, -1) : publicUrl) : '/';
+  if (!getToken()) {
+    return <LoginPage />;
+  }
 
-  return (
-    <BrowserRouter basename={basename}>
-      <Routes>
-        <Route path="/" element={<EditorPage />} />
-        <Route path="/display/:readonlyDiagramId" element={<EditorPage />} />
-      </Routes>
-    </BrowserRouter>
-  );
+  return <EditorPage />;
 }
 
 function EditorPage() {
+  const roleReadOnly = !isAdmin();
+
   // Initialize icon pack manager with core icons
   const iconPackManager = useIconPackManager(coreIcons);
   const { readonlyDiagramId } = useParams<{ readonlyDiagramId: string }>();
@@ -66,6 +63,8 @@ function EditorPage() {
   const [serverStorageAvailable, setServerStorageAvailable] = useState(false);
   const isReadonlyUrl =
     window.location.pathname.startsWith('/display/') && readonlyDiagramId;
+  const isReadOnly = isReadonlyUrl || roleReadOnly;
+
 
   // Initialize with empty diagram data
   // Create default colors for connectors
@@ -222,6 +221,11 @@ function EditorPage() {
   }, [diagrams]);
 
   const saveDiagram = () => {
+    if (isReadOnly) {
+      alert('Read only mode');
+      return;
+    }
+
     if (!diagramName.trim()) {
       alert(t('alert.enterDiagramName'));
       return;
@@ -584,6 +588,7 @@ function EditorPage() {
 
   // Auto-save functionality
   useEffect(() => {
+    if (isReadOnly) return;
     if (!currentModel || !hasUnsavedChanges || !currentDiagram) return;
 
     const autoSaveTimer = setTimeout(() => {
@@ -642,6 +647,8 @@ function EditorPage() {
   // Warn before closing if there are unsaved changes
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isReadOnly) return;
+      
       if (hasUnsavedChanges) {
         e.preventDefault();
         e.returnValue = t('alert.beforeUnload');
@@ -653,20 +660,33 @@ function EditorPage() {
     return () => {
       return window.removeEventListener('beforeunload', handleBeforeUnload);
     };
-  }, [hasUnsavedChanges]);
+  }, [hasUnsavedChanges, isReadOnly]);
 
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      //  READ-ONLY MODE
+      if (isReadOnly) {
+        // hanya izinkan 'm'
+        if (e.key.toLowerCase() === 'm') {
+          return;
+        }
+
+        //  blok semua shortcut lain
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
+
+      // WRITE MODE
+
       // Ctrl+S or Cmd+S for Save
       if ((e.ctrlKey || e.metaKey) && e.key === 's') {
         e.preventDefault();
 
-        // Quick save if current diagram exists and has unsaved changes
         if (currentDiagram && hasUnsavedChanges) {
           saveDiagram();
         } else {
-          // Otherwise show save dialog
           setShowSaveDialog(true);
         }
       }
@@ -678,16 +698,54 @@ function EditorPage() {
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
+    // capture phase
+    window.addEventListener('keydown', handleKeyDown, true);
+
     return () => {
-      return window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keydown', handleKeyDown, true);
     };
-  }, [currentDiagram, hasUnsavedChanges]);
+  }, [
+    isReadOnly,
+    currentDiagram,
+    hasUnsavedChanges
+  ]);
+
 
   return (
     <div className="App">
       <div className="toolbar">
-        {!isReadonlyUrl && (
+        {roleReadOnly && !isReadonlyUrl && (
+          <div
+            style={{
+              marginLeft: '10px',
+              color: 'red',
+              fontWeight: 'bold'
+            }}
+          >
+            🔒 Read Only (User)
+            <span style={{marginLeft: '10px'}}>
+                <button
+                  onClick={() => {
+                    return setShowDiagramManager(true);
+                  }}
+                  style={{ backgroundColor: '#2196F3', color: 'white' }}
+                >
+                  🌐 {t('nav.serverStorage')}
+                </button>
+                </span>
+              <span style={{marginLeft: '10px'}}>
+                <button
+                  onClick={() => {
+                    return setShowExportDialog(true);
+                  }}
+                  style={{ backgroundColor: '#007bff' }}
+                >
+                  💾 {t('nav.exportFile')}
+                </button>
+              </span>
+          </div>
+        )}
+        {!isReadOnly && (
           <>
             <button onClick={newDiagram}>{t('nav.newDiagram')}</button>
             {serverStorageAvailable && (
@@ -781,6 +839,16 @@ function EditorPage() {
             </>
           )}
         </span>
+        <button
+          onClick={logout}
+          style={{
+            backgroundColor: "#dc3545",
+            color: "white",
+            marginLeft: "auto"
+          }}
+        >
+          Logout
+        </button>
       </div>
 
       <div className="fossflow-container">
@@ -788,7 +856,7 @@ function EditorPage() {
           key={fossflowKey}
           initialData={diagramData}
           onModelUpdated={handleModelUpdated}
-          editorMode={isReadonlyUrl ? 'EXPLORABLE_READONLY' : 'EDITABLE'}
+          editorMode={isReadOnly ? 'EXPLORABLE_READONLY' : 'EDITABLE'}
           locale={allLocales[i18n.language as keyof typeof allLocales]}
           iconPackManager={{
             lazyLoadingEnabled: iconPackManager.lazyLoadingEnabled,

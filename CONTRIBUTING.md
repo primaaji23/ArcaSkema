@@ -367,7 +367,7 @@ describe('useIsoProjection', () => {
 
 1. **Update your fork**:
    ```bash
-   git remote add upstream https://github.com/stan-smith/FossFLOW.git
+   git remote add upstream https://github.com/primaaji23/ArcaSkema
    git fetch upstream
    git checkout main
    git merge upstream/main
