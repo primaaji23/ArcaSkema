@@ -12,25 +12,6 @@
 #     volumes:
 #       - ./diagrams:/data/diagrams
 
-# services:
-#   backend:
-#     build: ./packages/fossflow-backend
-#     container_name: arca-backend
-#     ports:
-#       - "3001:3001"
-#     environment:
-#       NODE_ENV: production
-#     restart: unless-stopped
-
-#   frontend:
-#     build: ./packages/fossflow-app
-#     container_name: arca-frontend
-#     ports:
-#       - "8080:80"
-#     depends_on:
-#       - backend
-#     restart: unless-stopped
-
 services:
   fossflow:
     build: .
@@ -47,5 +28,8 @@ services:
       - JWT_SECRET= supersecretkey
       - DB_HOST=host.docker.internal
       - DB_PORT=3306
+      - DB_USER=admin
+      - DB_PASS=notodewe
+      - DB_NAME=arcaskema_db
     volumes:
       - ./diagrams:/data/diagrams
