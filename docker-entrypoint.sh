@@ -2,7 +2,7 @@
 
 # Start Node.js backend if server storage is enabled
 if [ "$ENABLE_SERVER_STORAGE" = "true" ]; then
-    echo "Starting FossFLOW backend server..."
+    echo "Starting ArcaSkema backend server..."
     cd /app/packages/fossflow-backend
     npm install --production
     node server.js &

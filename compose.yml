@@ -1,13 +1,34 @@
+# services:
+#   fossflow:
+#     image: stnsmith/fossflow:latest
+#     pull_policy: always
+#     ports:
+#       - 80:80
+#     environment:
+#       - NODE_ENV=production
+#       - ENABLE_SERVER_STORAGE=${ENABLE_SERVER_STORAGE:-true}
+#       - STORAGE_PATH=/data/diagrams
+#       - ENABLE_GIT_BACKUP=${ENABLE_GIT_BACKUP:-false}
+#     volumes:
+#       - ./diagrams:/data/diagrams
+
+version: "3.8"
+
 services:
-  fossflow:
-    image: stnsmith/fossflow:latest
-    pull_policy: always
+  backend:
+    build: ./packages/fossflow-backend
+    container_name: arca-backend
     ports:
-      - 80:80
+      - "3001:3001"
     environment:
-      - NODE_ENV=production
-      - ENABLE_SERVER_STORAGE=${ENABLE_SERVER_STORAGE:-true}
-      - STORAGE_PATH=/data/diagrams
-      - ENABLE_GIT_BACKUP=${ENABLE_GIT_BACKUP:-false}
-    volumes:
-      - ./diagrams:/data/diagrams
+      NODE_ENV: production
+    restart: unless-stopped
+
+  frontend:
+    build: ./packages/fossflow-app
+    container_name: arca-frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
