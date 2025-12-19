@@ -13,7 +13,7 @@
 #       - ./diagrams:/data/diagrams
 
 services:
-  fossflow:
+  syncan:
     build: .
     restart: unless-stopped
     ports:
@@ -33,4 +33,4 @@ services:
       - DB_PASS=notodewe
       - DB_NAME=syncan_db
     volumes:
-      - /opt/fossflow/diagrams:/data/diagrams
+      - /opt/syncan/diagrams:/data/diagrams
