@@ -13,7 +13,7 @@
 #       - ./diagrams:/data/diagrams
 
 services:
-  syncan:
+  fossflow:
     build: .
     restart: unless-stopped
     ports:
