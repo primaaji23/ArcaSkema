@@ -64,7 +64,7 @@ function EditorPage() {
   const isReadonlyUrl =
     window.location.pathname.startsWith('/display/') && readonlyDiagramId;
   const isReadOnly = isReadonlyUrl || roleReadOnly;
-
+  const autoOpenedRef = useRef(false);
 
   // Initialize with empty diagram data
   // Create default colors for connectors
@@ -132,10 +132,15 @@ function EditorPage() {
 
   // Auto-show diagram manager for read-only users when server storage is available
   useEffect(() => {
-    if (roleReadOnly && serverStorageAvailable && !showDiagramManager) {
+    if (
+      roleReadOnly &&
+      serverStorageAvailable &&
+      !autoOpenedRef.current
+    ) {
       setShowDiagramManager(true);
+      autoOpenedRef.current = true;
     }
-  }, [roleReadOnly, serverStorageAvailable, showDiagramManager]);
+  }, [roleReadOnly, serverStorageAvailable]);
 
   // Check if readonlyDiagramId exists - if exists, load diagram in view-only mode
   useEffect(() => {
