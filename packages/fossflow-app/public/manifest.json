@@ -1,7 +1,7 @@
 {
   "short_name": "SynCan",
   "name": "SynCan - Isometric Diagramming Tool",
-  "description": "Create beautiful isometric diagrams with FossFLOW",
+  "description": "Create beautiful isometric diagrams with SynCan",
   "icons": [
     {
       "src": "favicon.ico",

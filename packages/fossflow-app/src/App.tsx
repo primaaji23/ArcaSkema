@@ -130,6 +130,13 @@ function EditorPage() {
       .catch(console.error);
   }, []);
 
+  // Auto-show diagram manager for read-only users when server storage is available
+  useEffect(() => {
+    if (roleReadOnly && serverStorageAvailable && !showDiagramManager) {
+      setShowDiagramManager(true);
+    }
+  }, [roleReadOnly, serverStorageAvailable, showDiagramManager]);
+
   // Check if readonlyDiagramId exists - if exists, load diagram in view-only mode
   useEffect(() => {
     if (!isReadonlyUrl || !serverStorageAvailable) return;
