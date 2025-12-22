@@ -899,7 +899,15 @@ function EditorPage() {
         </button>
       </div>
 
-      <div className="fossflow-container">
+      <div className="fossflow-container"
+        onContextMenu={
+          isReadOnly
+            ? (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              }
+            : undefined
+        }>
         <Isoflow
           key={fossflowKey}
           initialData={diagramData}

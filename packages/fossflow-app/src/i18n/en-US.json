@@ -12,7 +12,7 @@
         "current": "Current",
         "untitled": "Untitled Diagram",
         "modified": "Modified",
-        "sessionStorageNote": "Session storage only - export to save permanently"
+        "sessionStorageNote": "Export to save permanently"
     },
     "dialog": {
         "save": {
