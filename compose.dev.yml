@@ -13,7 +13,5 @@ services:
       - REFRESH_SECRET=superrefreshsecret
       - ROOT_USERNAME=root
       - ROOT_PASSWORD=Password1236
-      - ADMIN_USER=root
-      - ADMIN_PASS=Password1236
     volumes:
       - ./diagrams:/data/diagrams

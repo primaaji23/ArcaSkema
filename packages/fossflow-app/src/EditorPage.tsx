@@ -29,6 +29,7 @@ interface SavedDiagram {
 
 function EditorPage() {
   const roleReadOnly = !isAdmin();
+  const [sessionExpired, setSessionExpired] = useState(false);
 
   // Check token expiry periodically
   const navigate = useNavigate();
@@ -36,6 +37,7 @@ function EditorPage() {
     useEffect(() => {
     // Check immediately on mount
     if (isExpired()) {
+      setSessionExpired(true);
       logout();
       navigate("/login", { state:{ sessionExpired:true }, replace:true });
       return;
@@ -44,6 +46,7 @@ function EditorPage() {
     // Check every 30 seconds
     const timer = setInterval(() => {
       if (isExpired()) {
+        setSessionExpired(true);
         logout();
         navigate("/login", { state:{ sessionExpired:true }, replace:true });
       }
@@ -704,22 +707,22 @@ function EditorPage() {
   }, [serverStorageAvailable, currentModel, hasUnsavedChanges, currentDiagram, diagramName]);
 
   // Warn before closing if there are unsaved changes
-  useEffect(() => {
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (isReadOnly) return;
+  // useEffect(() => {
+  //   const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+  //     if (isReadOnly) return;
       
-      if (hasUnsavedChanges) {
-        e.preventDefault();
-        e.returnValue = t('alert.beforeUnload');
-        return e.returnValue;
-      }
-    };
+  //     if (hasUnsavedChanges) {
+  //       e.preventDefault();
+  //       e.returnValue = t('alert.beforeUnload');
+  //       return e.returnValue;
+  //     }
+  //   };
 
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => {
-      return window.removeEventListener('beforeunload', handleBeforeUnload);
-    };
-  }, [hasUnsavedChanges, isReadOnly]);
+  //   window.addEventListener('beforeunload', handleBeforeUnload);
+  //   return () => {
+  //     return window.removeEventListener('beforeunload', handleBeforeUnload);
+  //   };
+  // }, [hasUnsavedChanges, isReadOnly]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -901,6 +904,7 @@ function EditorPage() {
           onClick={() => {
             logout();
             navigate("/login");
+            window.location.href = "/login"
           }}
           style={{
             backgroundColor: "#dc3545",
@@ -1112,6 +1116,95 @@ function EditorPage() {
           }}
         />
       )}
+
+      {/* Session Expired Popup */}
+      {sessionExpired && (
+        <div className="session-overlay">
+          <style>{`
+            .session-overlay {
+              position: fixed;
+              inset: 0;
+              background: rgba(15, 23, 42, 0.6);
+              backdrop-filter: blur(6px);
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              z-index: 9999;
+              animation: fadeIn 0.25s ease-in-out;
+            }
+
+            .session-popup {
+              background: rgba(255, 255, 255, 0.95);
+              padding: 28px 30px;
+              border-radius: 16px;
+              text-align: center;
+              width: 360px;
+              box-shadow:
+                0 20px 40px rgba(0, 0, 0, 0.25),
+                inset 0 1px 0 rgba(255,255,255,0.4);
+              animation: scaleIn 0.25s ease-in-out;
+            }
+
+            .session-popup h3 {
+              margin: 0 0 8px;
+              font-size: 20px;
+              font-weight: 600;
+              color: #0f172a;
+            }
+
+            .session-popup p {
+              margin: 0 0 20px;
+              font-size: 14px;
+              color: #475569;
+              line-height: 1.6;
+            }
+
+            .session-popup button {
+              width: 100%;
+              padding: 10px 14px;
+              border-radius: 10px;
+              border: none;
+              background: linear-gradient(135deg, #dc2626, #ad0505ff);
+              color: white;
+              font-size: 14px;
+              font-weight: 500;
+              cursor: pointer;
+              transition: all 0.2s ease;
+              box-shadow: 0 6px 15px rgba(224, 10, 10, 0.35);
+            }
+
+            .session-popup button:hover {
+              transform: translateY(-1px);
+              box-shadow: 0 10px 25px rgba(203, 30, 30, 0.45);
+            }
+
+            .session-popup button:active {
+              transform: scale(0.98);
+            }
+
+            @keyframes fadeIn {
+              from { opacity: 0; }
+              to { opacity: 1; }
+            }
+
+            @keyframes scaleIn {
+              from { transform: scale(0.95); }
+              to { transform: scale(1); }
+            }
+          `}</style>
+
+          <div className="session-popup">
+            <h3>Session Expired</h3>
+            <p>Your login session has expired.<br />Please log in again.</p>
+
+            <button onClick={() => window.location.href = "/login"}>
+              Login Again
+            </button>
+          </div>
+        </div>
+      )}
+
+
     </div>
   );
 }

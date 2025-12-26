@@ -81,5 +81,5 @@ export function logout() {
   localStorage.removeItem("role");
   localStorage.removeItem("expiresAt");
 
-  window.location.href = "/login";
+  // window.location.href = "/login";
 }

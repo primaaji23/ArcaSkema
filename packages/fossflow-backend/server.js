@@ -134,33 +134,7 @@ app.post("/api/auth/login", async (req, res) => {
           role: "admin"
         },
         process.env.JWT_SECRET,
-        { expiresIn: "1m" }
-      );
-
-      return res.json({
-        token,
-        role: "admin"
-      });
-    }
-
-    /**
-     * ======================================
-     * HARD-CODED ADMIN LOGIN (OPTIONAL)
-     * ======================================
-     */
-    if (
-      process.env.ADMIN_USER &&
-      process.env.ADMIN_PASS &&
-      username === process.env.ADMIN_USER &&
-      password === process.env.ADMIN_PASS
-    ) {
-      const token = jwt.sign(
-        {
-          username,
-          role: "admin"
-        },
-        process.env.JWT_SECRET,
-        { expiresIn: "1m" }
+        { expiresIn: "25s" }
       );
 
       return res.json({

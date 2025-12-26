@@ -35,7 +35,5 @@ services:
       - DB_NAME=syncan_db
       - ROOT_USERNAME=root
       - ROOT_PASSWORD=Password1236
-      - ADMIN_USER=root
-      - ADMIN_PASS=Password1236
     volumes:
       - /opt/syncan/diagrams:/data/diagrams
