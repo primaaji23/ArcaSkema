@@ -18,6 +18,9 @@ import './App.css';
 import { BrowserRouter, Navigate, Route, Routes, useParams, useLocation } from 'react-router-dom';
 import LoginPage from "./pages/LoginPage";
 import EditorPage from "./EditorPage";
+import Dashboard from "./pages/Dashboard";
+import InventoryPage from "./pages/InventoryPage";
+import AssetsPage from "./pages/AssetsPage";
 import { getToken, isAdmin, logout, isExpired, getExpiry} from "./auth/auth";
 
 // Load core isoflow icons (always loaded)
@@ -30,14 +33,6 @@ interface SavedDiagram {
   createdAt: string;
   updatedAt: string;
 }
-
-// function App() {
-//   if (!getToken()) {
-//     return <LoginPage />;
-//   }
-
-//   return <EditorPage />;
-// }
 
 function ProtectedRoute({ children }: { children: JSX.Element }) {
   const token = getToken();
@@ -65,9 +60,15 @@ export default function App() {
 
         <Route path="/login" element={<LoginPage />} />
 
+        <Route path="/logout" element={<LogoutHandler />} />
+
         <Route
-          path="/logout"
-          element={<LogoutHandler />}
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
         />
 
         <Route
@@ -79,7 +80,26 @@ export default function App() {
           }
         />
 
-        <Route path="*" element={<Navigate to="/flow" replace />} />
+        <Route
+          path="/inventory"
+          element={
+            <ProtectedRoute>
+              <InventoryPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/assets"
+          element={
+            <ProtectedRoute>
+              <AssetsPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+
       </Routes>
     </BrowserRouter>
   );
@@ -89,5 +109,6 @@ function LogoutHandler() {
   logout();
   return <Navigate to="/login" replace />;
 }
+
 
 // export default App;

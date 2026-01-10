@@ -13,7 +13,7 @@ import { allLocales } from 'fossflow';
 import { useIconPackManager, IconPackName } from './services/iconPackManager';
 import './App.css';
 import { getToken, isAdmin, logout, isExpired} from "./auth/auth";
-
+import AppLayout from "./layouts/AppLayout";
 
 // Load core isoflow icons (always loaded)
 const coreIcons = flattenCollections([isoflowIsopack]);
@@ -27,7 +27,7 @@ interface SavedDiagram {
   updatedAt: string;
 }
 
-function EditorPage() {
+function Flow() {
   const roleReadOnly = !isAdmin();
   const [sessionExpired, setSessionExpired] = useState(false);
 
@@ -664,33 +664,35 @@ function EditorPage() {
         fitToScreen: true
       };
 
-      // const updatedDiagram: SavedDiagram = {
-      //   ...currentDiagram,
-      //   data: savedData,
-      //   updatedAt: new Date().toISOString()
-      // };
+      // Update current diagram data
+      const updatedDiagram: SavedDiagram = {
+        ...currentDiagram,
+        data: savedData,
+        updatedAt: new Date().toISOString()
+      };
 
-      // setDiagrams((prevDiagrams) => {
-      //   return prevDiagrams.map((d) => {
-      //     return d.id === currentDiagram.id ? updatedDiagram : d;
-      //   });
-      // });
+      // Update diagrams list
+      setDiagrams((prevDiagrams) => {
+        return prevDiagrams.map((d) => {
+          return d.id === currentDiagram.id ? updatedDiagram : d;
+        });
+      });
 
-      // // Update last opened data
-      // try {
-      //   localStorage.setItem(
-      //     'fossflow-last-opened-data',
-      //     JSON.stringify(savedData)
-      //   );
-      //   setLastAutoSave(new Date());
-      //   setHasUnsavedChanges(false);
-      // } catch (e) {
-      //   console.error('Auto-save failed:', e);
-      //   if (e instanceof DOMException && e.name === 'QuotaExceededError') {
-      //     alert(t('alert.autoSaveFailed'));
-      //     setShowStorageManager(true);
-      //   }
-      // }
+      // Update last opened data
+      try {
+        localStorage.setItem(
+          'fossflow-last-opened-data',
+          JSON.stringify(savedData)
+        );
+        setLastAutoSave(new Date());
+        setHasUnsavedChanges(false);
+      } catch (e) {
+        console.error('Auto-save failed:', e);
+        if (e instanceof DOMException && e.name === 'QuotaExceededError') {
+          alert(t('alert.autoSaveFailed'));
+          setShowStorageManager(true);
+        }
+      }
 
       localStorage.setItem(
         'fossflow-last-opened-data',
@@ -707,34 +709,34 @@ function EditorPage() {
   }, [serverStorageAvailable, currentModel, hasUnsavedChanges, currentDiagram, diagramName]);
 
   // Warn before closing if there are unsaved changes
-  // useEffect(() => {
-  //   const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-  //     if (isReadOnly) return;
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isReadOnly) return;
       
-  //     if (hasUnsavedChanges) {
-  //       e.preventDefault();
-  //       e.returnValue = t('alert.beforeUnload');
-  //       return e.returnValue;
-  //     }
-  //   };
+      if (hasUnsavedChanges) {
+        e.preventDefault();
+        e.returnValue = t('alert.beforeUnload');
+        return e.returnValue;
+      }
+    };
 
-  //   window.addEventListener('beforeunload', handleBeforeUnload);
-  //   return () => {
-  //     return window.removeEventListener('beforeunload', handleBeforeUnload);
-  //   };
-  // }, [hasUnsavedChanges, isReadOnly]);
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      return window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [hasUnsavedChanges, isReadOnly]);
 
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       //  READ-ONLY MODE
       if (isReadOnly) {
-        // hanya izinkan 'm'
+        // keybind 'm'
         if (e.key.toLowerCase() === 'm') {
           return;
         }
 
-        //  blok semua shortcut lain
+        //  block other shortcuts
         e.preventDefault();
         e.stopPropagation();
         return;
@@ -793,7 +795,7 @@ function EditorPage() {
                 >
                   🌐 {t('nav.serverStorage')}
                 </button>
-                </span>
+              </span>
               <span style={{marginLeft: '10px'}}>
                 <button
                   onClick={() => {
@@ -809,7 +811,7 @@ function EditorPage() {
         {!isReadOnly && (
           <>
             <button onClick={newDiagram}>{t('nav.newDiagram')}</button>
-            {serverStorageAvailable && (
+            {/* {serverStorageAvailable && (
               <button
                 onClick={() => {
                   return setShowDiagramManager(true);
@@ -818,7 +820,15 @@ function EditorPage() {
               >
                 🌐 {t('nav.serverStorage')}
               </button>
-            )}
+            )} */}
+            <button
+                  onClick={() => {
+                    return setShowDiagramManager(true);
+                  }}
+                  style={{ backgroundColor: '#2196F3', color: 'white' }}
+                >
+                  🌐 {t('nav.serverStorage')}
+                </button>
             <button
               onClick={() => {
                 return setShowSaveDialog(true);
@@ -1209,4 +1219,10 @@ function EditorPage() {
   );
 }
 
-export default EditorPage;
+export default function EditorPage() {
+  return (
+    <AppLayout>
+      <Flow />
+    </AppLayout>
+  );
+}

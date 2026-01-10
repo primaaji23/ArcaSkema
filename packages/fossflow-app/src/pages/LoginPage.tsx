@@ -42,7 +42,7 @@ export default function LoginPage() {
     localStorage.setItem("role", data.role);
     localStorage.setItem("expiresAt", expiresAt.toString());
 
-    window.location.href = "/flow";
+    window.location.href = "/dashboard";
   } catch (error) {
     console.error("Login error:", error);
     alert("Terjadi kesalahan koneksi");
